@@ -1,0 +1,46 @@
+<odoo>
+    <record id="view_question_fields_form" model="ir.ui.view">
+        <field name="name">question.fields.form</field>
+        <field name="model">question.fields</field>
+        <field name="arch" type="xml">
+            <form string="Questões para Formulário de Serviço de Campo">
+                <sheet>
+                    <group>
+                        <!-- Campo para o nome da questão -->
+                        <field name="name" string="Nome" required="1"/>
+                            <!-- Tipo da questão -->
+                            <field name="type_form" string="Tipo" required="1"/>
+                            <!-- Opções relacionadas à questão -->
+                            <field 
+                                name="options_ids" 
+                                invisible="type_form != 'list' and type_form != 'check_list'"
+                                widget="one2many_list" 
+                                string="Opções"
+                            >
+                                <tree>
+                                    <field name="name" string="Opção"/>
+                                </tree>
+                            </field>
+                        
+                        <!-- Campo obrigatório -->
+                        <field name="required" string="Obrigatória"/>
+                        <field name="conditional" string="Condição"/>
+                        <!-- Opções relacionadas à questão -->
+                        <field 
+                            name="sub_question_id" 
+                            invisible="conditional != True"
+                            widget="one2many_list" 
+                            string="Sub Pergunta"
+                        >
+                            <tree>
+                                <field name="name" string="Pergunta"/>
+                                <field name="conditional" string="Condição"/>
+                                <field name="type_form" string="Tipo"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

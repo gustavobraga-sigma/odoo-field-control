@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_task_form_inherit_activity_type" model="ir.ui.view">
+        <field name="name">project.task.form.activity.type</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/> <!-- Referência à view original -->
+        <field name="arch" type="xml">
+             <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="activity_field_id" />
+            </xpath>
+             <xpath expr="//page[@name='extra_info']" position="after">
+                <page 
+                    id="page_suporte_info" 
+                    string="Formulários" 
+                >
+                    <field name="activity_field_id" widget="forms_field"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

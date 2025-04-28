@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="fleet_vehicle_odometer_form_inherit_photo" model="ir.ui.view">
+        <field name="name">fleet.vehicle.odometer.form.photo</field>
+        <field name="model">fleet.vehicle.odometer</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_odometer_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/group" position="inside">
+                <group>
+                    <field name="photo" widget="image" />
+                    <field name="employee_id"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

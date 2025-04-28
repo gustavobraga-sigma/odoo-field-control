@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="forms_field.FormsFieldsWidget">
+        <!-- FORMULÁRIOS DE INÍCIO -->
+        <div t-if="state.startForms.length">
+            <h2>Formulários para Início</h2>
+            <div class="forms-container">
+                <t t-foreach="state.startForms" t-as="form" t-key="form.form.id">
+                    <div class="forms-title">
+                        <h3><t t-esc="form.form.name" /></h3>
+                        <span t-att-class="isFormAnswered(form.form.id) ? 'form-done' : 'form-pending'">
+                            <t t-esc="isFormAnswered(form.form.id) ? ' CONCLUÍDO' : ' PENDENTE'" />
+                        </span>
+                    </div>
+                    <div t-if="form.questions.length" class="form-box">
+                        <t t-foreach="form.questions" t-as="question" t-key="question.id">
+                            <div class="card-input">
+                                <div>
+                                    <span><t t-esc="question.name" /></span> - 
+                                    <strong><t t-if="question.required">Obrigatória</t></strong>
+                                </div>
+
+                                <div t-if="question.conditional == true">
+                                    <div class="itens-question-options-checkbox">
+                                        <input 
+                                            type="radio"
+                                            t-att-id="'sim-' + question.id"
+                                            t-att-name="'multi-' + question.id"
+                                            t-att-value="'Sim'"
+                                            t-att-checked="(state.prevAnswers?.[form.form.id]?.[question.id] === 'Sim' || state.answers?.[form.form.id]?.[question.id] === 'Sim') ? true : false"
+                                            t-att-disabled="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? true : false"
+                                            t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                        />
+                                        <label t-att-for="'sim-' + question.id">Sim</label>
+                                    </div>
+                                    <div class="itens-question-options-checkbox">
+                                        <input 
+                                            type="radio"
+                                            t-att-id="'nao-' + question.id"
+                                            t-att-name="'multi-' + question.id"
+                                            t-att-value="'Não'"
+                                            t-att-checked="(state.prevAnswers?.[form.form.id]?.[question.id] === 'Não' || state.answers?.[form.form.id]?.[question.id] === 'Não') ? true : false"
+                                            t-att-disabled="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? true : false"
+                                            t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                        />
+                                        <label t-att-for="'nao-' + question.id">Não</label>
+                                    </div>
+
+                                    <t t-if="(state.answers?.[form.form.id]?.[question.id] == 'Sim' or state.prevAnswers?.[form.form.id]?.[question.id] == 'Sim')">
+                                        <t t-foreach="question.sub_question" t-as="sub_question" t-key="sub_question.id">
+                                            <div class="card-input">
+                                                <div>
+                                                    <span><t t-esc="sub_question.name" /></span> - 
+                                                    <strong><t t-if="sub_question.required">Obrigatória</t></strong>
+                                                </div>
+                                                <input 
+                                                    type="text"
+                                                    t-on-input="(ev) => updateAnswer(form.form.id, sub_question.id, ev.target.value)"
+                                                    t-att-value="state.prevAnswers?.[form.form.id]?.[sub_question.id] ?? state.answers?.[form.form.id]?.[sub_question.id] ?? ''"
+                                                    t-att-readonly="(answeredMap[form.form.id] and answeredMap[form.form.id][sub_question.id]) ? 'readonly' : false"
+                                                />
+                                            </div>
+                                        </t>
+                                    </t>                                    
+                                </div>
+                                <div t-else="">
+                                    <!-- Campo de resposta de assinatura -->
+                                    <div t-if="question.type_form == 'signature' and question.conditional != true">
+                                        <t t-if="!state.editingSignature?.[form.form.id]?.[question.id]">
+                                            <!-- Exibe a assinatura salva -->
+                                            <div class="preview-list">
+                                                <t t-set="signatureSrc" t-value="state.answers?.[form.form.id]?.[question.id] || state.prevAnswers?.[form.form.id]?.[question.id]" />
+                                                <t t-if="signatureSrc and signatureSrc.length">
+                                                    <t t-foreach="signatureSrc" t-as="imgSrc" t-key="imgSrc">
+                                                        <img t-att-src="imgSrc" class="preview-image" t-on-click="() => openImageModal(imgSrc)" />
+                                                    </t>
+                                                </t>
+                                            </div>
+                                            <t t-if="!answeredMap[form.form.id]">
+                                                <!-- Botão para habilitar edição de assinatura -->
+                                                <button type="button" class="btn btn-primary" t-on-click="() => enableSignatureEdit(form.form.id, question.id)">
+                                                    Editar Assinatura
+                                                </button>
+                                            </t>
+                                        </t>
+                                        <t t-else="">
+                                            <!-- Exibe o canvas para criar uma nova assinatura -->
+                                            <canvas
+                                                t-ref="canvas"
+                                                class="signature-canvas"
+                                                t-on-mousedown="startDraw"
+                                                t-on-mousemove="draw"
+                                                t-on-mouseup="stopDraw"
+                                                t-on-mouseleave="stopDraw"
+                                                t-on-touchstart="startDraw"
+                                                t-on-touchmove="draw"
+                                                t-on-touchend="stopDraw"
+                                                t-on-touchcancel="stopDraw">
+                                            </canvas>
+                                            <div class="signature-actions">
+                                                <button type="button" class="btn btn-secondary" t-on-click="clearCanvas">Limpar</button>
+                                                <button type="button" class="btn btn-primary" t-on-click="(e) => saveSignature(form.form.id, question.id, question.type_form)">
+                                                    Salvar Nova Assinatura
+                                                </button>
+                                            </div>
+                                        </t>
+                                    </div>
+
+                                    <!-- Campo de resposta curta ou longa -->
+                                    <div t-if="(question.type_form == 'short_answer' or question.type_form == 'long_answer') and question.conditional != true">
+                                        <input 
+                                            type="text"
+                                            t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                            t-att-value="state.prevAnswers?.[form.form.id]?.[question.id] ?? state.answers?.[form.form.id]?.[question.id] ?? ''"
+                                            t-att-readonly="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? 'readonly' : false"
+                                        />
+                                    </div>
+
+                                    <!-- Campo numérico -->
+                                    <div t-if="question.type_form == 'numeric' and question.conditional != true">
+                                        <input 
+                                            type="number"
+                                            t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                            t-att-value="state.prevAnswers?.[form.form.id]?.[question.id] ?? state.answers?.[form.form.id]?.[question.id] ?? ''"
+                                            t-att-readonly="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? 'readonly' : false"
+                                        />
+                                    </div>
+
+                                    <!-- Múltipla escolha (Sim/Não) -->
+                                    <div t-if="question.type_form == 'multiple_choice'" class="box-question-options-checkbox">
+                                        <div class="itens-question-options-checkbox">
+                                            <input 
+                                                type="radio"
+                                                t-att-id="'sim-' + question.id"
+                                                t-att-name="'multi-' + question.id"
+                                                t-att-value="'Sim'"
+                                                t-att-checked="(state.prevAnswers?.[form.form.id]?.[question.id] === 'Sim' || state.answers?.[form.form.id]?.[question.id] === 'Sim') ? true : false"
+                                                t-att-disabled="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? true : false"
+                                                t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                            />
+                                            <label t-att-for="'sim-' + question.id">Sim</label>
+                                        </div>
+                                        
+                                        <div class="itens-question-options-checkbox">
+                                            <input 
+                                                type="radio"
+                                                t-att-id="'nao-' + question.id"
+                                                t-att-name="'multi-' + question.id"
+                                                t-att-value="'Não'"
+                                                t-att-checked="(state.prevAnswers?.[form.form.id]?.[question.id] === 'Não' || state.answers?.[form.form.id]?.[question.id] === 'Não') ? true : false"
+                                                t-att-disabled="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? true : false"
+                                                t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                            />
+                                            <label t-att-for="'nao-' + question.id">Não</label>
+                                        </div>
+                                        
+                                    </div>
+
+                                    <!-- Lista ou checklist -->
+                                    <div t-if="(question.type_form == 'list' or question.type_form == 'check_list') and question.conditional != true" class="box-question-options-checkbox">
+                                        <t t-foreach="question.options" t-as="option" t-key="option.id">
+                                            <div class="itens-question-options-checkbox">
+                                                <input 
+                                                    type="checkbox"
+                                                    t-att-id="option.id"
+                                                    t-att-name="option.id"
+                                                    t-att-value="option.name"
+                                                    t-att-checked="(state.prevAnswers?.[form.form.id]?.[question.id]?.includes(option.name) || 
+                                                                    state.answers?.[form.form.id]?.[question.id]?.includes(option.name)) ? true : false"
+                                                    t-att-disabled="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? true : false"
+                                                    t-on-change="(ev) => updateAnswer(form.form.id, question.id, option.name, question.type_form, ev.target.checked)"
+                                                />
+
+                                                <label t-att-for="option.id">
+                                                    <t t-esc="option.name" />
+                                                </label>
+                                            </div>
+                                        </t>
+                                    </div>
+
+                                    <!-- Upload de imagem -->
+                                    <div t-if="question.type_form == 'photo' and question.conditional != true">
+                                        <t t-set="currentAnswers" t-value="state.answers?.[form.form.id]?.[question.id] || state.prevAnswers?.[form.form.id]?.[question.id]" />
+                                        <t t-if="!isFormAnswered(form.form.id)">
+                                            <input
+                                                type="file"
+                                                multiple="multiple"
+                                                accept="image/*"
+                                                t-on-change="(ev) => handleMultiFileUpload(form.form.id, question.id, ev)"
+                                            />
+                                        </t>
+                                    
+
+                                    <!-- Pré-visualização das imagens -->
+                                    <div class="preview-list">
+                                        <t t-if="currentAnswers and currentAnswers.length">
+                                            <t t-foreach="currentAnswers" t-as="imgSrc" t-key="imgSrc">
+                                                <img t-att-src="imgSrc" class="preview-image" t-on-click="() => openImageModal(imgSrc)" />
+                                            </t>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </t>
+
+                        <!-- Botão Enviar -->
+                        <t t-if="!isFormAnswered(form.form.id)">
+                            <button
+                                class="btn btn-primary"
+                                t-on-click="() => this.submitAnswers(form.form.id)"
+                                t-att-disabled="!state.answers[form.form.id] || Object.keys(state.answers[form.form.id]).length === 0"
+                            >
+                                Enviar Respostas
+                            </button>
+                        </t>
+                        <t t-else="">
+                            <button
+                                class="btn btn-primary"
+                                t-on-click="() => this.editAnswers(form.form.id)"
+                            >
+                                Editar Respostas
+                            </button>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </div>
+
+        <!-- FORMULÁRIOS DE FINALIZAÇÃO -->
+        <div t-if="state.endForms.length">
+            <h2>Formulários para Finalização</h2>
+            <div class="forms-container">
+                <t t-foreach="state.endForms" t-as="form" t-key="form.form.id">
+                    <div class="forms-title">
+                        <h3><t t-esc="form.form.name" /></h3>
+                        <span t-att-class="isFormAnswered(form.form.id) ? 'form-done' : 'form-pending'">
+                            <t t-esc="isFormAnswered(form.form.id) ? ' CONCLUÍDO' : ' PENDENTE'" />
+                        </span>
+                    </div>
+                    <div t-if="form.questions.length" class="form-box">
+                        <t t-foreach="form.questions" t-as="question" t-key="question.id">
+                            <div class="card-input">
+                                <div>
+                                    <span><t t-esc="question.name" /></span> - 
+                                    <strong><t t-if="question.required">Obrigatória</t></strong>
+                                </div>
+
+                                <div t-if="question.conditional == true">
+                                    <div class="itens-question-options-checkbox">
+                                        <input 
+                                            type="radio"
+                                            t-att-id="'sim-' + question.id"
+                                            t-att-name="'multi-' + question.id"
+                                            t-att-value="'Sim'"
+                                            t-att-checked="(state.prevAnswers?.[form.form.id]?.[question.id] === 'Sim' || state.answers?.[form.form.id]?.[question.id] === 'Sim') ? true : false"
+                                            t-att-disabled="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? true : false"
+                                            t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                        />
+                                        <label t-att-for="'sim-' + question.id">Sim</label>
+                                    </div>
+                                    <div class="itens-question-options-checkbox">
+                                        <input 
+                                            type="radio"
+                                            t-att-id="'nao-' + question.id"
+                                            t-att-name="'multi-' + question.id"
+                                            t-att-value="'Não'"
+                                            t-att-checked="(state.prevAnswers?.[form.form.id]?.[question.id] === 'Não' || state.answers?.[form.form.id]?.[question.id] === 'Não') ? true : false"
+                                            t-att-disabled="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? true : false"
+                                            t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                        />
+                                        <label t-att-for="'nao-' + question.id">Não</label>
+                                    </div>
+
+                                    <t t-if="(state.answers?.[form.form.id]?.[question.id] == 'Sim' or state.prevAnswers?.[form.form.id]?.[question.id] == 'Sim')">
+                                        <t t-foreach="question.sub_question" t-as="sub_question" t-key="sub_question.id">
+                                            <div class="card-input">
+                                                <div>
+                                                    <span><t t-esc="sub_question.name" /></span> - 
+                                                    <strong><t t-if="sub_question.required">Obrigatória</t></strong>
+                                                </div>
+                                                <input 
+                                                    type="text"
+                                                    t-on-input="(ev) => updateAnswer(form.form.id, sub_question.id, ev.target.value)"
+                                                    t-att-value="state.prevAnswers?.[form.form.id]?.[sub_question.id] ?? state.answers?.[form.form.id]?.[sub_question.id] ?? ''"
+                                                    t-att-readonly="(answeredMap[form.form.id] and answeredMap[form.form.id][sub_question.id]) ? 'readonly' : false"
+                                                />
+                                            </div>
+                                        </t>
+                                    </t>                                    
+                                </div>
+                                <div t-else="">
+                                    <!-- Campo de resposta de assinatura -->
+                                    <div t-if="question.type_form == 'signature' and question.conditional != true">
+                                        <t t-if="isFormAnswered(form.form.id)">
+                                            <!-- Exibe a assinatura salva -->
+                                            <div class="preview-list">
+                                                <t t-set="signatureSrc" t-value="state.answers?.[form.form.id]?.[question.id] || state.prevAnswers?.[form.form.id]?.[question.id]" />
+                                                <t t-if="signatureSrc and signatureSrc.length">
+                                                    <t t-foreach="signatureSrc" t-as="imgSrc" t-key="imgSrc">
+                                                        <img t-att-src="imgSrc" class="preview-image" t-on-click="() => openImageModal(imgSrc)" />
+                                                    </t>
+                                                </t>
+                                            </div>
+                                           
+                                        </t>
+                                        <t t-else="">
+                                            <!-- Exibe o canvas para criar uma nova assinatura -->
+                                            <canvas
+                                                t-ref="canvas"
+                                                class="signature-canvas"
+                                                t-on-mousedown="startDraw"
+                                                t-on-mousemove="draw"
+                                                t-on-mouseup="stopDraw"
+                                                t-on-mouseleave="stopDraw"
+                                                t-on-touchstart="startDraw"
+                                                t-on-touchmove="draw"
+                                                t-on-touchend="stopDraw"
+                                                t-on-touchcancel="stopDraw">
+                                            </canvas>
+                                            <div class="signature-actions">
+                                                <button type="button" class="btn btn-secondary" t-on-click="clearCanvas">Limpar</button>
+                                                <button type="button" class="btn btn-primary" t-on-click="(e) => saveSignature(form.form.id, question.id, question.type_form)">
+                                                    Salvar Nova Assinatura
+                                                </button>
+                                            </div>
+                                        </t>
+                                        <t t-if="!state.editingSignature?.[form.form.id]?.[question.id]">
+                                            <t t-if="!answeredMap[form.form.id]">
+                                                <!-- Botão para habilitar edição de assinatura -->
+                                                <button type="button" class="btn btn-primary" t-on-click="() => enableSignatureEdit(form.form.id, question.id)">
+                                                    Editar Assinatura
+                                                </button>
+                                            </t>
+                                        </t>
+                                    </div>
+                                    
+                                    <!-- Campo de resposta curta ou longa -->
+                                    <div t-if="(question.type_form == 'short_answer' or question.type_form == 'long_answer') and question.conditional != true">
+                                        <input 
+                                            type="text"
+                                            t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                            t-att-value="state.prevAnswers?.[form.form.id]?.[question.id] ?? state.answers?.[form.form.id]?.[question.id] ?? ''"
+                                            t-att-readonly="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? 'readonly' : false"
+                                        />
+                                    </div>
+
+                                    <!-- Campo numérico -->
+                                    <div t-if="question.type_form == 'numeric' and question.conditional != true">
+                                        <input 
+                                            type="number"
+                                            t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                            t-att-value="state.prevAnswers?.[form.form.id]?.[question.id] ?? state.answers?.[form.form.id]?.[question.id] ?? ''"
+                                            t-att-readonly="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? 'readonly' : false"
+                                        />
+                                    </div>
+
+                                    <!-- Múltipla escolha (Sim/Não) -->
+                                    <div t-if="question.type_form == 'multiple_choice'" class="box-question-options-checkbox">
+                                        <div class="itens-question-options-checkbox">
+                                            <input 
+                                                type="radio"
+                                                t-att-id="'sim-' + question.id"
+                                                t-att-name="'multi-' + question.id"
+                                                t-att-value="'Sim'"
+                                                t-att-checked="(state.prevAnswers?.[form.form.id]?.[question.id] === 'Sim' || state.answers?.[form.form.id]?.[question.id] === 'Sim') ? true : false"
+                                                t-att-disabled="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? true : false"
+                                                t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                            />
+                                            <label t-att-for="'sim-' + question.id">Sim</label>
+                                        </div>
+                                        
+                                        <div class="itens-question-options-checkbox">
+                                            <input 
+                                                type="radio"
+                                                t-att-id="'nao-' + question.id"
+                                                t-att-name="'multi-' + question.id"
+                                                t-att-value="'Não'"
+                                                t-att-checked="(state.prevAnswers?.[form.form.id]?.[question.id] === 'Não' || state.answers?.[form.form.id]?.[question.id] === 'Não') ? true : false"
+                                                t-att-disabled="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? true : false"
+                                                t-on-input="(ev) => updateAnswer(form.form.id, question.id, ev.target.value)"
+                                            />
+                                            <label t-att-for="'nao-' + question.id">Não</label>
+                                        </div>
+                                        
+                                    </div>
+
+                                    <!-- Lista ou checklist -->
+                                    <div t-if="(question.type_form == 'list' or question.type_form == 'check_list') and question.conditional != true" class="box-question-options-checkbox">
+                                        <t t-foreach="question.options" t-as="option" t-key="option.id">
+                                            <div class="itens-question-options-checkbox">
+                                                <input 
+                                                    type="checkbox"
+                                                    t-att-id="option.id"
+                                                    t-att-name="option.id"
+                                                    t-att-value="option.name"
+                                                    t-att-checked="(state.prevAnswers?.[form.form.id]?.[question.id]?.includes(option.name) || 
+                                                                    state.answers?.[form.form.id]?.[question.id]?.includes(option.name)) ? true : false"
+                                                    t-att-disabled="(answeredMap[form.form.id] and answeredMap[form.form.id][question.id]) ? true : false"
+                                                    t-on-change="(ev) => updateAnswer(form.form.id, question.id, option.name, question.type_form, ev.target.checked)"
+                                                />
+
+                                                <label t-att-for="option.id">
+                                                    <t t-esc="option.name" />
+                                                </label>
+                                            </div>
+                                        </t>
+                                    </div>
+
+                                    <!-- Upload de imagem -->
+                                    <div t-if="question.type_form == 'photo' and question.conditional != true">
+                                        <t t-set="currentAnswers" t-value="state.answers?.[form.form.id]?.[question.id] || state.prevAnswers?.[form.form.id]?.[question.id]" />
+                                        <t t-if="!isFormAnswered(form.form.id)">
+                                            <input
+                                                type="file"
+                                                multiple="multiple"
+                                                accept="image/*"
+                                                t-on-change="(ev) => handleMultiFileUpload(form.form.id, question.id, ev)"
+                                            />
+                                        </t>
+                                    
+
+                                    <!-- Pré-visualização das imagens -->
+                                    <div class="preview-list">
+                                        <t t-if="currentAnswers and currentAnswers.length">
+                                            <t t-foreach="currentAnswers" t-as="imgSrc" t-key="imgSrc + index">
+                                                <div style="position: relative;">
+                                                    <t t-if="!isFormAnswered(form.form.id)">
+                                                        <span class="remove-img-preview" t-on-click="() => removeImage(form.form.id, question.id, imgSrc)">
+                                                            X
+                                                        </span>
+                                                    </t>
+                                                    <img t-att-src="imgSrc" class="preview-image" t-on-click="() => openImageModal(imgSrc)" />
+                                                </div>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </t>
+
+                        <!-- Botão Enviar -->
+                        <t t-if="!isFormAnswered(form.form.id)">
+                            <button
+                                class="btn btn-primary"
+                                t-on-click="() => this.submitAnswers(form.form.id)"
+                                t-att-disabled="!state.answers[form.form.id] || Object.keys(state.answers[form.form.id]).length === 0"
+                            >
+                                Enviar Respostas
+                            </button>
+                        </t>
+                        <t t-else="">
+                            <t t-if="!state.isTaskDone">
+                                <button
+                                    class="btn btn-primary"
+                                    t-on-click="() => this.editAnswers(form.form.id)"
+                                >
+                                    Editar Respostas
+                                </button>
+                            </t>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </div>
+
+        <!-- Modal de imagem -->
+        <t t-if="state.imageModalVisible">
+            <div class="overlay-image-zoom" t-on-click="() => closeImageModal()">
+                <div class="modal-content-image-zoom" t-on-click.stop="">
+                    <span class="close-btn" t-on-click="() => closeImageModal()"><p>x</p></span>
+                    <img t-att-src="state.modalImageSrc" class="full-image" />
+                </div>
+            </div>
+        </t>
+    </t>
+</templates>

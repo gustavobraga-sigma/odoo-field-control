@@ -1,0 +1,197 @@
+.forms-container {
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.form-box {
+    padding: 15px;
+    border: 2px solid gray;
+    border-radius: 10px;
+    width: 600px;
+}
+
+.forms-title {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.form-done {
+    color: green;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.form-pending {
+    color: rgb(209, 209, 21);
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.card-input {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 7px;
+}
+
+.card-input input {
+    padding: 10px;
+    border: 2px solid gray;
+    background-color: transparent;
+    border-radius: 8px;
+    width: 100%;
+}
+
+.card-input span {
+    font-size: 1rem;
+}
+
+.preview-list {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.preview-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.overlay-image-zoom {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 999;
+}
+
+.modal-content-image-zoom {
+    width: 40%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    border-radius: 10px;
+}
+
+.full-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: white;
+    cursor: pointer;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 1.5rem;
+    width: 1.5rem;
+    border-top-right-radius: 10px;
+}
+
+.close-btn p {
+    font-size: 1rem;
+    margin: 0;
+    line-height: 1;
+    /* Impede espaçamento extra vertical */
+    display: flex;
+    /* Garante alinhamento interno, caso necessário */
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.box-question-options-checkbox {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.itens-question-options-checkbox {
+    display: flex;
+    gap: 5px;
+    /* justify-content: center; */
+    align-items: center;
+}
+
+.itens-question-options-checkbox input[type="checkbox"],
+.itens-question-options-checkbox input[type="radio"] {
+    width: 10%;
+}
+
+.itens-question-options-checkbox label {
+    width: 90%;
+}
+
+
+.signature-canvas {
+    border: 2px dashed #999;
+    border-radius: 6px;
+    background-color: #fff;
+    width: 100%;
+    height: 250px;
+    touch-action: none;
+    /* importante para touchscreen */
+}
+
+.signature-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.remove-img-preview {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
+
+
+
+@media screen and (max-width: 500px) {
+    .form-box {
+        max-width: 350px;
+    }
+
+    .card-input input {
+        width: 100%;
+    }
+
+    .card-input input[type="file"] {
+        padding: 5px;
+    }
+
+    .signature-canvas {
+        width: 300px;
+    }
+
+}

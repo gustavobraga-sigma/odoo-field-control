@@ -1,0 +1,26 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+type_forms_access_manager_fsm,Type Forms Access Manager FSM,model_type_forms,industry_fsm.group_fsm_manager,1,1,1,1
+question_fields_access_manager_fsm,Question Fields Access Manager FSM,model_question_fields,industry_fsm.group_fsm_manager,1,1,1,1
+question_field_options_access_manager_fsm,Question Field OptionsAccess Manager FSM,model_question_field_option,base.group_erp_manager,1,1,1,1
+sub_question_fields_access_manager_fsm,Sub Question FieldsAccess Manager FSM,model_sub_question_fields,base.group_erp_manager,1,1,1,1
+activity_types_field_access_admins,Activity Types Field Access Manager FSM,model_activity_types_field,base.group_erp_manager,1,1,1,1
+forms_access_admins,Forms Access Manager FSM,model_forms_field,base.group_erp_manager,1,1,1,1
+
+type_forms_access_all_users,Type Forms Access All Users,model_type_forms,industry_fsm.group_fsm_user,1,0,0,0
+question_fields_access_all_users,Question Fields Access All Users,model_question_fields,industry_fsm.group_fsm_user,1,0,0,0
+question_field_options_access_all_users,Question Field Options Access User,model_question_field_option,industry_fsm.group_fsm_user,1,0,0,0
+sub_question_fields_access_all_users,Sub Question Fields Access User,model_sub_question_fields,industry_fsm.group_fsm_user,1,0,0,0
+activity_types_field_all_users,Activity Types Field Access All Users,model_activity_types_field,industry_fsm.group_fsm_user,1,0,0,0
+forms_access_all_users,Forms Access Manager FSM,model_forms_field,industry_fsm.group_fsm_user,1,0,0,0
+answers_forms_access_all_users,Answers Forms Access User,model_answers_forms,industry_fsm.group_fsm_user,1,1,1,1
+
+type_forms_access_tecnico_de_campo,Type Forms Access Field Technician,model_type_forms,group_tecnico_de_campo,1,0,0,0
+question_fields_access_tecnico_de_campo,Question Fields Access Field Technician,model_question_fields,group_tecnico_de_campo,1,0,0,0
+question_field_options_access_tecnico_de_campo,Question Field Options Field Technician,model_question_field_option,group_tecnico_de_campo,1,0,0,0
+sub_question_fields_access_tecnico_de_campo,Sub Question FieldsAccess Field Technician,model_sub_question_fields,group_tecnico_de_campo,1,0,0,0
+activity_types_field_access_tecnico_de_campo,Activity Types Field Access Field Technician,model_activity_types_field,group_tecnico_de_campo,1,0,0,0
+forms_access_tecnico_de_campo,Forms Access Field Technician,model_forms_field,group_tecnico_de_campo,1,1,1,0
+
+access_project_task_fsm_user,access.project.task.fsm.user,project.model_project_task,group_tecnico_de_campo,1,0,0,0
+

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_activity_types_field" model="ir.actions.act_window">
+        <field name="name">Configurações de Atividades de campo</field>
+        <field name="res_model">activity.types.field</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="activity_types_field_root"
+        name="Configuração de Atividades (campo)"
+        sequence="30"
+        parent="industry_fsm.fsm_menu_settings"
+        action="action_activity_types_field"
+    />
+
+    <record id="view_activity_types_field_tree" model="ir.ui.view">
+        <field name="name">view.activity.types.field.tree</field>
+        <field name="model">activity.types.field</field>
+        <field name="arch" type="xml">
+            <tree string="Tipos de Atividades de Campo">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_activity_types_field_form" model="ir.ui.view">
+        <field name="name">view.activity.types.field.form</field>
+        <field name="model">activity.types.field</field>
+        <field name="arch" type="xml">
+            <form string="Configuração de Atividades (campo)">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="start_form_ids" widget="many2many_tags"/>
+                        <field name="end_form_ids" widget="many2many_tags"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

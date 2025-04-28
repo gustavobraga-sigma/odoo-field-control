@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem
+        id="menu_type_forms_root"
+        name="Configuração de Formulários"
+        sequence="50"
+        parent="industry_fsm.fsm_menu_settings"
+        action="action_type_forms"
+    />
+
+</odoo>
+
+

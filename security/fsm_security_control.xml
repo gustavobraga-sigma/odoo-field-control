@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data noupdate="0">
+      <!-- Grupo Técnico de Campo -->
+      <record id="group_tecnico_de_campo" model="res.groups">
+        <field name="name">Técnico de Campo</field>
+        <!-- Aqui vinculamos à categoria do Serviço de Campo -->
+        <field name="category_id" ref="base.module_category_services_field_service"/>
+      </record>
+    </data>
+  </odoo>
+  
